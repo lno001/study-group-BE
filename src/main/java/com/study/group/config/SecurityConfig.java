@@ -3,14 +3,20 @@ package com.study.group.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.group.auth.jwt.JwtAuthenticationFilter;
+import com.study.group.common.ApiResponse;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -28,29 +34,61 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
-            	    // 회원가입, 로그인만 허용
-            		.requestMatchers(
-            		        "/api/auth/signup",
-            		        "/api/auth/login",
-            		        "/api/auth/refresh"
-            		).permitAll()
-
-            	    // 스웨거, 액추에이터 허용
-            	    .requestMatchers(
-            	            "/swagger-ui/**",
-            	            "/swagger-ui.html",
-            	            "/api-docs/**",
-            	            "/v3/api-docs/**",
-            	            "/actuator/**"
-            	    ).permitAll()
-
-            	    .requestMatchers(HttpMethod.GET, "/api/groups", "/api/groups/**").permitAll()
-            	    // 나머지 (logout 포함)는 인증 필요
-            	    .anyRequest().authenticated()
-            	)
-            // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
+                .requestMatchers(
+                        "/api/auth/signup",
+                        "/api/auth/login",
+                        "/api/auth/refresh"
+                ).permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/groups", "/api/groups/**").permitAll()
+                .requestMatchers(
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/api-docs/**",
+                        "/v3/api-docs/**",
+                        "/actuator/**"
+                ).permitAll()
+                .anyRequest().authenticated()
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(authenticationEntryPoint())
+                .accessDeniedHandler(accessDeniedHandler())
+            )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            ObjectMapper objectMapper = new ObjectMapper();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
+
+            String header = request.getHeader("Authorization");
+            String msg = (header != null && header.startsWith("Bearer "))
+                    ? "유효하지 않거나 만료된 토큰입니다."
+                    : "로그인이 필요합니다.";
+
+            objectMapper.writeValue(
+                    response.getWriter(),
+                    ApiResponse.fail(401, msg)
+            );
+        };
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            ObjectMapper objectMapper = new ObjectMapper();
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
+            objectMapper.writeValue(
+                    response.getWriter(),
+                    ApiResponse.fail(403, "접근 권한이 없습니다.")
+            );
+        };
     }
 }

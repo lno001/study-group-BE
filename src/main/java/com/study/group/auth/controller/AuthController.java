@@ -39,14 +39,14 @@ public class AuthController {
         return ResponseEntity
                 .ok(ApiResponse.success(200, "로그인 성공", tokenResponse));
     }
-    
+
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(Authentication authentication) {
         Long userId = (Long) authentication.getPrincipal();
         authService.logout(userId);
         return ResponseEntity.ok(ApiResponse.success(200, "로그아웃되었습니다."));
     }
-    
+
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<TokenResponse>> refresh(
             @Valid @RequestBody RefreshRequest request

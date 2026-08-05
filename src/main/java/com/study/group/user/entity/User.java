@@ -1,8 +1,20 @@
 package com.study.group.user.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "UNI_USERS")
@@ -27,6 +39,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Builder.Default
     @Column(nullable = false, length = 20)
     private String role = "USER";   // USER / ADMIN
 
@@ -36,23 +49,24 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Builder.Default
     @Column(name = "is_deleted", length = 1)
     private String isDeleted = "N";
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-        if (this.isDeleted == null) {
-            this.isDeleted = "N";
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (isDeleted == null) {
+            isDeleted = "N";
         }
-        if (this.role == null) {
-            this.role = "USER";
+        if (role == null) {
+            role = "USER";
         }
     }
 
     @PreUpdate
     public void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 }

@@ -1,8 +1,9 @@
 package com.study.group.group.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.Builder;
 import lombok.Getter;
-import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -21,4 +22,5 @@ public class GroupResponse {
     private String gender;
     private String leaderNickname;
     private LocalDateTime createdAt;
+    private String isPublic;
 }

@@ -11,6 +11,8 @@ import com.study.group.group.dto.GroupResponse;
 import com.study.group.group.dto.GroupUpdateRequest;
 import com.study.group.group.entity.StudyGroup;
 import com.study.group.group.repository.StudyGroupRepository;
+import com.study.group.member.entity.StudyMember;
+import com.study.group.member.repository.StudyMemberRepository;
 import com.study.group.user.entity.User;
 import com.study.group.user.repository.UserRepository;
 
@@ -22,6 +24,7 @@ public class GroupService {
 
     private final StudyGroupRepository studyGroupRepository;
     private final UserRepository userRepository;
+    private final StudyMemberRepository studyMemberRepository;
 
     // 그룹 생성
     @Transactional
@@ -56,6 +59,15 @@ public class GroupService {
                 .build();
 
         studyGroupRepository.save(group);
+        
+        StudyMember leaderMember = StudyMember.builder()
+                .group(group)
+                .user(leader)
+                .status("수락")
+                .isDeleted("N")
+                .build();
+        studyMemberRepository.save(leaderMember);
+        
         return toResponse(group);
     }
 

@@ -20,6 +20,7 @@ public class GroupResponse {
     private String subject;
     private String ageRange;
     private String gender;
+    private Long leaderId;
     private String leaderNickname;
     private LocalDateTime createdAt;
     private String isPublic;

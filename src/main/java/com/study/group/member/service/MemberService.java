@@ -257,4 +257,17 @@ public class MemberService {
 
         member.setIsDeleted("Y");
     }
+    
+    @Transactional(readOnly = true)
+    public String getMyStatus(Long userId, Long groupId) {
+        StudyGroup group = studyGroupRepository.findByGroupIdAndIsDeleted(groupId, "N")
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 스터디 그룹입니다."));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        return studyMemberRepository.findByGroupAndUserAndIsDeleted(group, user, "N")
+                .map(StudyMember::getStatus)
+                .orElse(null);
+    }
 }

@@ -149,9 +149,10 @@ public class GroupService {
                 .subject(group.getSubject())
                 .ageRange(group.getAgeRange())
                 .gender(group.getGender())
+                .isPublic(group.getIsPublic())
+                .leaderId(group.getLeader().getUserId())
                 .leaderNickname(group.getLeader().getNickname())
                 .createdAt(group.getCreatedAt())
-                .isPublic(group.getIsPublic())
                 .build();
     }
 }

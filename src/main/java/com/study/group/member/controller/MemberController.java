@@ -1,6 +1,7 @@
 package com.study.group.member.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,6 +69,19 @@ public class MemberController {
 
         List<MemberResponse> members = memberService.getMembers(userId, groupId, status);
         return ResponseEntity.ok(ApiResponse.success(200, "멤버 목록 조회 성공", members));
+    }
+    
+    @GetMapping("/api/groups/{groupId}/members/me")
+    public ResponseEntity<ApiResponse<Map<String, String>>> myStatus(
+            Authentication authentication,
+            @PathVariable("groupId") Long groupId
+    ) {
+        Long userId = (Long) authentication.getPrincipal();
+        String status = memberService.getMyStatus(userId, groupId);
+        return ResponseEntity.ok(
+                ApiResponse.success(200, "조회 성공",
+                        Map.of("status", status == null ? "" : status))
+        );
     }
 
  // 자발적 탈퇴

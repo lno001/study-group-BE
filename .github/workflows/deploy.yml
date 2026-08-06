@@ -49,5 +49,5 @@ jobs:
             sudo chown ubuntu:ubuntu /home/ubuntu/app/study-group.env
             sudo chmod 600 /home/ubuntu/app/study-group.env
             sudo systemctl restart study-group
-            sleep 10
+            sleep 45
             curl -sf http://127.0.0.1:8080/actuator/health

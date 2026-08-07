@@ -33,7 +33,6 @@ public class GroupController {
 
     private final GroupService groupService;
 
-    // 그룹 생성
     @PostMapping
     public ResponseEntity<ApiResponse<GroupResponse>> createGroup(
             Authentication authentication,
@@ -46,7 +45,6 @@ public class GroupController {
                 .body(ApiResponse.success(201, "스터디 그룹이 생성되었습니다.", response));
     }
 
- // 그룹 목록 조회
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<GroupResponse>>> getGroups(
             @RequestParam(value = "region", required = false) String region,
@@ -59,7 +57,19 @@ public class GroupController {
         return ResponseEntity.ok(ApiResponse.success(200, "그룹 목록 조회 성공", groups));
     }
 
- // 상세 조회
+    // /api/groups/{groupId} 보다 먼저 매칭되도록 /my 를 위에 둠
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<PageResponse<GroupResponse>>> getMyGroups(
+            Authentication authentication,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        Long userId = (Long) authentication.getPrincipal();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        PageResponse<GroupResponse> groups = groupService.getMyGroups(userId, pageable);
+        return ResponseEntity.ok(ApiResponse.success(200, "내 그룹 목록 조회 성공", groups));
+    }
+
     @GetMapping("/{groupId}")
     public ResponseEntity<ApiResponse<GroupResponse>> getGroup(
             @PathVariable("groupId") Long groupId
@@ -68,7 +78,6 @@ public class GroupController {
         return ResponseEntity.ok(ApiResponse.success(200, "그룹 상세 조회 성공", response));
     }
 
-    // 수정
     @PutMapping("/{groupId}")
     public ResponseEntity<ApiResponse<GroupResponse>> updateGroup(
             Authentication authentication,
@@ -80,7 +89,6 @@ public class GroupController {
         return ResponseEntity.ok(ApiResponse.success(200, "그룹 수정 성공", response));
     }
 
-    // 삭제
     @DeleteMapping("/{groupId}")
     public ResponseEntity<ApiResponse<Void>> deleteGroup(
             Authentication authentication,

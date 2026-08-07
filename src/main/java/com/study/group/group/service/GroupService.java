@@ -88,6 +88,13 @@ public class GroupService {
 
         return PageResponse.of(page.map(this::toResponse));
     }
+    
+    // 내 그룹 (개설 + 수락 멤버)
+    @Transactional(readOnly = true)
+    public PageResponse<GroupResponse> getMyGroups(Long userId, Pageable pageable) {
+        Page<StudyGroup> page = studyGroupRepository.findMyGroups(userId, pageable);
+        return PageResponse.of(page.map(this::toResponse));
+    }
 
     // 그룹 상세
     @Transactional(readOnly = true)

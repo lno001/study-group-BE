@@ -21,7 +21,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build jar
-        run: ./gradlew clean bootJar -x test
+        run: ./gradlew clean test bootJar
 
       - name: Copy jar to EC2
         uses: appleboy/scp-action@v0.1.7
